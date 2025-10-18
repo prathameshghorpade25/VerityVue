@@ -160,9 +160,11 @@ VerityVue is an agentic AI system that detects, verifies, and triages deepfake i
 ## Quickstart (Local)
 
 Prereqs:
-- Docker + Docker Compose
+- Docker + Docker Compose (Docker Desktop recommended)
 - Python 3.10+
 - Node 18+
+
+Note: The docker-compose.yml file has been updated to use the latest Docker Compose format and includes volume mounts for development.
 
 ```bash
 # 1) Copy env
