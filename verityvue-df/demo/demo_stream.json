@@ -1,0 +1,32 @@
+[
+	{
+		"id": "A-001",
+		"uploader": "citizen_journal",
+		"timestamp": "2025-10-01T12:00:00Z",
+		"text": "Mayor announcing sudden tax cuts (clip)",
+		"source": "local-social",
+		"tags": ["politician", "breaking"],
+		"media": "demo_assets/politician_synthetic.mp4",
+		"virality": {"shares": 120, "reposts": 40}
+	},
+	{
+		"id": "B-002",
+		"uploader": "neighborhood_watch",
+		"timestamp": "2025-10-01T13:00:00Z",
+		"text": "Local resident caught in scandal (image)",
+		"source": "group-chat",
+		"tags": ["individual", "rumor"],
+		"media": "demo_assets/individual_synthetic.jpg",
+		"virality": {"shares": 80, "reposts": 25}
+	},
+	{
+		"id": "C-003",
+		"uploader": "parks_dept",
+		"timestamp": "2025-10-01T14:00:00Z",
+		"text": "Community picnic highlights (benign control)",
+		"source": "official",
+		"tags": ["community", "benign"],
+		"media": "demo_assets/benign_clip.mp4",
+		"virality": {"shares": 10, "reposts": 3}
+	}
+]
