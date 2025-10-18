@@ -5,5 +5,6 @@ COPY vite.config.js /app/vite.config.js
 COPY index.html /app/index.html
 COPY src /app/src
 RUN npm install
+RUN npm install vite
 EXPOSE 5173
 CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
