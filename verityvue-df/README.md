@@ -32,10 +32,10 @@ VerityVue is an agentic AI system that detects, verifies, and triages deepfake i
 - ✅ Claim detail view with basic information 
 - ✅ API client (frontend/src/api.js) with configurable base URL 
 
-#### Demo Infrastructure 
-- ✅ demo_stream.json with 3 scenarios (politician, individual, benign) 
-- ✅ demo/replay_demo.py script to POST demo data to /ingest 
-- ✅ demo/demo_assets/ placeholder directory 
+#### Data Sample Infrastructure 
+- ✅ data_stream.json with 3 scenarios (politician, individual, benign) 
+- ✅ samples/replay_data.py script to POST sample data to /ingest 
+- ✅ samples/assets/ placeholder directory 
 
 #### Docker & Deployment 
 - ✅ Backend Dockerfile with Python 3.11 
@@ -107,9 +107,9 @@ VerityVue is an agentic AI system that detects, verifies, and triages deepfake i
 - ✅ Frontend tests run via: cd frontend && npm test
 - ✅ All tests passing with agreed coverage
 
-#### E2E Demo
-- ✅ Created demo_stream.json replay that creates claims in moderator queue
-- ✅ Implemented command: python3 scripts/replay_demo.py demo_stream.json --endpoint http://localhost:8000
+#### E2E Testing
+- ✅ Created data_stream.json replay that creates claims in moderator queue
+- ✅ Implemented command: python3 scripts/replay_data.py data_stream.json --endpoint http://localhost:8000
 - ✅ Verified claim creation, agent verification, and advisory preview
 
 #### Dockerization + One-Command Run
@@ -124,9 +124,9 @@ VerityVue is an agentic AI system that detects, verifies, and triages deepfake i
 - ✅ Created ETHICS.md with synthetic/consented media declaration
 - ✅ Included human-in-loop policy, data deletion & retention steps
 
-#### Demo Resources
-- ✅ Created demo/verityvue_demo.mp4 or demo_instructions.md
-- ✅ Provided instructions for recording demo
+#### Testing Resources
+- ✅ Created samples/verityvue_test.mp4 or test_instructions.md
+- ✅ Provided instructions for testing
 
 ### Milestone 3 — Agentic Planner, Aggregator & Dashboard ✅
 
@@ -176,12 +176,12 @@ docker compose up --build
 # Frontend: http://localhost:5173
 # API docs: http://localhost:8000/docs
 
-# 3) Seed demo stream (either)
+# 3) Seed data stream (either)
 # a) via script
-python demo/replay_demo.py --file demo/demo_stream.json --host http://localhost:8000
+python samples/replay_data.py --file samples/data_stream.json --host http://localhost:8000
 # b) via API (PowerShell example)
-Invoke-RestMethod -Method Post -Uri http://localhost:8000/demo/replay -ContentType 'application/json' -Body (
-	Get-Content demo/demo_stream.json | ConvertFrom-Json | ConvertTo-Json -Compress | ForEach-Object { '{"items":' + $_ + ', "base_dir":"./demo"}' }
+Invoke-RestMethod -Method Post -Uri http://localhost:8000/data/replay -ContentType 'application/json' -Body (
+	Get-Content samples/data_stream.json | ConvertFrom-Json | ConvertTo-Json -Compress | ForEach-Object { '{"items":' + $_ + ', "base_dir":"./samples"}' }
 )
 ```
 
@@ -241,7 +241,7 @@ verityvue-df/
       routes/
         claims.py
         moderation.py
-        demo.py
+        data.py
     tests/
       test_endpoints.py
     requirements.txt
@@ -255,16 +255,16 @@ verityvue-df/
       App.jsx
       api.js
     Dockerfile
-  demo/
-    demo_stream.json
-    demo_assets/
+  samples/
+    data_stream.json
+    assets/
       .gitkeep
-    replay_demo.py
+    replay_data.py
   config/thresholds.json
   docker-compose.yml
   ETHICS.md
   .env.example
-  DEMO.md
+  TEST.md
 ```
 
 ## CI / Tests
@@ -274,8 +274,8 @@ cd verityvue-df/backend
 pytest -q
 ```
 
-## Demo Plan & Screencast
-See `DEMO.md` for a short narrated flow and fallback screencast instructions.
+## Test Plan & Screencast
+See `TEST.md` for a short narrated flow and fallback screencast instructions.
 
 ## Notes
 - Prototype scope; one reliable E2E path.
