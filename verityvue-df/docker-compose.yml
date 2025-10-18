@@ -5,6 +5,10 @@ services:
       - .env
     environment:
       - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ./backend:/app
+      - ./demo:/demo
+      - media_storage:/media
     ports:
       - "8000:8000"
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
@@ -25,6 +29,8 @@ services:
     build: ./frontend
     env_file:
       - .env
+    volumes:
+      - ./frontend:/app
     ports:
       - "5173:5173"
     command: npm run dev -- --host 0.0.0.0
@@ -41,7 +47,8 @@ services:
       POSTGRES_DB: verityvue
     ports:
       - "5432:5432"
-# Volumes removed to fix ContainerConfig error
-# volumes:
-#   media_storage:
-#   pgdata:
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  media_storage:
+  pgdata:
