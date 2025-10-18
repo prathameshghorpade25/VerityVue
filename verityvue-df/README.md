@@ -32,10 +32,10 @@ VerityVue is an agentic AI system that detects, verifies, and triages deepfake i
 - ✅ Claim detail view with basic information 
 - ✅ API client (frontend/src/api.js) with configurable base URL 
 
-#### Data Sample Infrastructure 
-- ✅ data_stream.json with 3 scenarios (politician, individual, benign) 
-- ✅ samples/replay_data.py script to POST sample data to /ingest 
-- ✅ samples/assets/ placeholder directory 
+#### Evaluation Infrastructure
+- ✅ data_stream.json with 3 scenarios (politician, individual, benign)
+- ✅ evaluation/replay_data.py script to POST evaluation data to /ingest
+- ✅ evaluation/resources/ placeholder directory 
 
 #### Docker & Deployment 
 - ✅ Backend Dockerfile with Python 3.11 
@@ -114,7 +114,7 @@ VerityVue is an agentic AI system that detects, verifies, and triages deepfake i
 
 #### Dockerization + One-Command Run
 - ✅ Configured docker-compose up --build to spin up all services
-- ✅ Created ./scripts/run_demo.sh to replay demo and open UI
+- ✅ Created ./scripts/run_evaluation.sh to replay evaluation data and open UI
 - ✅ Verified script works on fresh machine/CI
 - ✅ Listed required environment variables in README.md
 
@@ -178,10 +178,10 @@ docker compose up --build
 
 # 3) Seed data stream (either)
 # a) via script
-python samples/replay_data.py --file samples/data_stream.json --host http://localhost:8000
+python evaluation/replay_data.py --file evaluation/data_stream.json --host http://localhost:8000
 # b) via API (PowerShell example)
 Invoke-RestMethod -Method Post -Uri http://localhost:8000/data/replay -ContentType 'application/json' -Body (
-	Get-Content samples/data_stream.json | ConvertFrom-Json | ConvertTo-Json -Compress | ForEach-Object { '{"items":' + $_ + ', "base_dir":"./samples"}' }
+	Get-Content evaluation/data_stream.json | ConvertFrom-Json | ConvertTo-Json -Compress | ForEach-Object { '{"items":' + $_ + ', "base_dir":"./evaluation"}' }
 )
 ```
 
@@ -255,9 +255,9 @@ verityvue-df/
       App.jsx
       api.js
     Dockerfile
-  samples/
+  evaluation/
     data_stream.json
-    assets/
+    resources/
       .gitkeep
     replay_data.py
   config/thresholds.json
