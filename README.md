@@ -2,191 +2,179 @@
 
 See the truth behind the frame.
 
-VerityVue is an agentic AI system that detects, verifies, and triages deepfake images/videos of public figures and ordinary people across local social streams. It produces provenance-rich forensic reports (evidence cards + confidence score), shows per-frame heatmaps, and routes high-risk/low-confidence items to a moderator dashboard for human approval before publishing advisories to simulated municipal channels.
+VerityVue is an agentic AI system that detects, verifies, and triages suspicious images and videos (deepfakes and manipulated media). It produces provenance-rich forensic reports (evidence cards + confidence score), shows per-frame heatmaps, and routes high-risk or low-confidence items to a moderator dashboard for human review before publishing advisories to simulated channels.
 
-## Implementation Progress
+---
 
-### Milestone 1 — Project Skeleton & Basic Ingestion ✅ 
+## Table of contents
 
-#### Repository Structure 
-- ✅ Created complete repo skeleton: backend/, frontend/, demo/, config/ 
-- ✅ Added docker-compose.yml with backend, frontend, redis, postgres services 
-- ✅ Created README.md with quickstart instructions 
-- ✅ Added ETHICS.md with data policy and consent declarations 
-- ✅ Added .env.example with all required environment variables 
-- ✅ Created config/thresholds.json for agent decision thresholds 
+- Project status
+- Features
+- Architecture overview
+- Quickstart (recommended: Docker)
+- Quickstart (development without Docker)
+- Demo & replay
+- Tests
+- Configuration & environment variables
+- Contributing, ethics & license
+- Troubleshooting
 
-#### Backend API Foundation 
-- ✅ FastAPI application (backend/app/main.py) with CORS middleware 
-- ✅ Configuration management (backend/app/config.py) with env vars and thresholds 
-- ✅ In-memory state store (backend/app/state.py) for claims and agent logs 
-- ✅ Basic claim routes (backend/app/routes/claims.py): 
-  - POST /ingest - multipart file upload with metadata 
-  - GET /claims - list all claims 
-  - GET /claims/{id} - get claim details 
-  - GET /health - health check endpoint 
+---
 
-#### Frontend Dashboard 
-- ✅ React + Vite application (frontend/) 
-- ✅ Minimal stream list UI showing claims 
-- ✅ Claim detail view with basic information 
-- ✅ API client (frontend/src/api.js) with configurable base URL 
+## Project status
 
-#### Demo Infrastructure 
-- ✅ demo_stream.json with 3 scenarios (politician, individual, benign) 
-- ✅ demo/replay_demo.py script to POST demo data to /ingest 
-- ✅ demo/demo_assets/ placeholder directory 
+Milestones 1–4 are implemented (skeleton, detection & reverse search, agentic planner, dashboard, tests, demo). The codebase contains:
+- backend/ — FastAPI service, Celery tasks, ML stubs and verification aggregator
+- frontend/ — React + Vite moderator dashboard
+- demo/ — replay scripts and demo assets
+- config/ — thresholds and other configuration
+- docker-compose.yml — full stack with Redis, Postgres and worker
 
-#### Docker & Deployment 
-- ✅ Backend Dockerfile with Python 3.11 
-- ✅ Frontend Dockerfile with Node 20 
-- ✅ Docker Compose configuration for full stack 
-- ✅ Volume mounts for development 
+See the detailed milestone checklist in the repository for progress and decisions.
 
-### Milestone 2 — Detection + Reverse-Search (Core ML) ✅ 
+---
 
-#### Deepfake Detection 
-- ✅ Detector stub (backend/app/ml/detector_stub.py) with deterministic scoring 
-- ✅ Real detector wrapper (backend/app/ml/detector.py) normalizing scores to [0,1] 
-- ✅ Per-frame score generation for videos 
-- ✅ Frame extraction (backend/app/frames.py) using ffmpeg 
-- ✅ Heatmap generation with OpenCV color mapping 
+## Key features
 
-#### Reverse Search System 
-- ✅ Perceptual hash index (backend/app/search/phash_index.py) using ImageHash 
-- ✅ Reverse search stub (backend/app/search/reverse_search_stub.py) with sample matches 
-- ✅ Index building from demo corpus 
-- ✅ Similarity scoring and match ranking 
+- Ingest multipart image/video claims with metadata (POST /ingest)
+- Deterministic detector + real detector wrapper producing per-frame scores
+- Frame extraction (ffmpeg) and heatmap generation (OpenCV)
+- Perceptual-hash reverse search for similar images
+- Aggregator that returns verdicts (SUPPORTS / REFUTES / UNVERIFIED) with confidence (0–100) and ranked evidence
+- Agentic planner using Celery + Redis (observe → plan → act)
+- LLM-based advisory generator with strict templates (no hallucination)
+- Moderator dashboard: list, inspector, playback, heatmap toggle, evidence cards, publish/escalate flows
+- Publish endpoint that requires moderator token and logs simulated channel messages
 
-#### Verification Aggregator 
-- ✅ Aggregation logic (backend/app/verify/aggregator.py) combining detection + search 
-- ✅ Verdict generation: SUPPORTS/REFUTES/UNVERIFIED 
-- ✅ Confidence scoring (0-100) based on thresholds 
-- ✅ Evidence ranking and selection 
+---
 
-#### Integration & Testing 
-- ✅ Wired detection and reverse search into ingestion pipeline 
-- ✅ Updated claim details to include detection scores, evidence, verdict 
-- ✅ Test scripts: run_detector.py, run_reverse_search.py 
-- ✅ Added OpenCV, Pillow, ImageHash dependencies
+## Architecture overview
 
-### Milestone 3 — Agentic Planner, Aggregator & Dashboard ✅
+- FastAPI backend exposes ingestion and claim endpoints and schedules verification tasks.
+- Celery workers run detector, reverse search, and advisory tasks.
+- Redis used for Celery broker/state; Postgres for persistent claim storage (configured in docker-compose).
+- Frontend (React + Vite) queries the API for claim streams and inspectors.
+- Demo replay script posts sample items to /ingest to exercise the end-to-end flow.
 
-#### Agentic Planner (Redis + Celery)
-- ✅ Implemented observe→plan→act workflow in backend/agent/planner.py
-- ✅ Created Celery tasks (verify_task, reverse_search_task, advisory_task)
-- ✅ Agent logs show sequence: observed → planned → acted → result for ingested demo items
-- ✅ Verified via docker-compose logs showing agent run for demo replay
+---
 
-#### Verification Aggregator
-- ✅ Enhanced backend/verification/aggregator.py to return complete verdict data
-- ✅ Output format: { verdict: "UNVERIFIED"|"REFUTES"|"SUPPORTS", confidence: 0-100, evidence: [...] }
-- ✅ Tested with canned evidence to validate output
-
-#### LLM Advisory Generator
-- ✅ Implemented backend/llm/advisory.py with OpenAI/local LLM integration
-- ✅ Used strict no-hallucination templating
-- ✅ Generated example advisories for demo claims with proper evidence citation
-
-#### Moderator Dashboard
-- ✅ Implemented full feature set: claim list, claim inspector, video playback
-- ✅ Added heatmap toggle, evidence cards, verdict & advisory preview
-- ✅ Included Publish & Escalate buttons and Agent Log viewer
-- ✅ Verified workflow: open inspector, toggle heatmap, view evidence, publish
-
-#### Publish / Escalate Flows
-- ✅ Implemented POST /claims/{id}/publish endpoint (requires moderator_token)
-- ✅ Created simulated message publishing to simulated_channel/logs
-- ✅ Verified publish response and simulated channel log entries
-
-### Milestone 4 — Polish, Tests, Docs, & Demo ✅
-
-#### Unit & Integration Tests
-- ✅ Implemented tests under backend/tests/ and frontend/tests/
-- ✅ Backend tests run via: pytest backend/tests -q
-- ✅ Frontend tests run via: cd frontend && npm test
-- ✅ All tests passing with agreed coverage
-
-#### E2E Demo
-- ✅ Created demo_stream.json replay that creates claims in moderator queue
-- ✅ Implemented command: python3 scripts/replay_demo.py demo_stream.json --endpoint http://localhost:8000
-- ✅ Verified claim creation, agent verification, and advisory preview
-
-#### Dockerization + One-Command Run
-- ✅ Configured docker-compose up --build to spin up all services
-- ✅ Created ./scripts/run_demo.sh to replay demo and open UI
-- ✅ Verified script works on fresh machine/CI
-- ✅ Listed required environment variables in README.md
-
-#### Documentation
-- ✅ Completed README with architecture overview, configuration, run instructions
-- ✅ Added test instructions, security notes, and links to demo assets
-- ✅ Created ETHICS.md with synthetic/consented media declaration
-- ✅ Included human-in-loop policy, data deletion & retention steps
-
-#### Demo Resources
-- ✅ Created demo/verityvue_demo.mp4 or demo_instructions.md
-- ✅ Provided instructions for recording demo
-
-## Quickstart (Local)
+## Quickstart (Docker — recommended)
 
 Prereqs:
-- Docker + Docker Compose (Docker Desktop recommended)
-- Python 3.10+
-- Node 18+
+- Docker Desktop (Windows) or Docker + Docker Compose
+- Git
 
-Note: The docker-compose.yml file has been updated to use the latest Docker Compose format and includes volume mounts for development.
-
-```bash
-# 1) Copy env
+1) Copy env
+```powershell
 cp .env.example .env
-
-# 2) Build & run full stack (API, Frontend, Redis, Worker)
-docker compose up --build
-# Backend: http://localhost:8000
-# Frontend: http://localhost:5173
-# API docs: http://localhost:8000/docs
-
-# 3) Seed demo stream (either)
-# a) via script
-python demo/replay_demo.py --file demo/demo_stream.json --host http://localhost:8000
-# b) via API (PowerShell example)
-Invoke-RestMethod -Method Post -Uri http://localhost:8000/demo/replay -ContentType 'application/json' -Body (
-	Get-Content demo/demo_stream.json | ConvertFrom-Json | ConvertTo-Json -Compress | ForEach-Object { '{"items":' + $_ + ', "base_dir":"./demo"}' }
-)
 ```
 
-## Quickstart (Without Docker)
+2) Build and run the full stack:
+```powershell
+docker compose up --build
+```
+- Backend: http://localhost:8000
+- Frontend: http://localhost:5173
+- API docs: http://localhost:8000/docs
+
+3) Seed demo stream (example PowerShell):
+```powershell
+# from repo root (Windows PowerShell)
+python .\demo\replay_demo.py --file .\demo\demo_stream.json --host http://localhost:8000
+```
+
+Notes:
+- Use `docker compose logs -f backend` or `docker compose logs -f worker` to follow agent runs.
+- To rebuild after changes: `docker compose up --build --detach`.
+
+---
+
+## Quickstart (Without Docker — Windows)
 
 Backend:
-```bash
-cd verityvue-df/backend
-python -m venv .venv && . .venv/Scripts/activate
+```powershell
+cd backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-# Terminal 1: API
+# API
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-# Terminal 2: Worker
+# Worker (separate terminal)
 celery -A app.agent.celery_app.celery worker --loglevel=INFO
 ```
 
 Frontend:
-```bash
-cd verityvue-df/frontend
+```powershell
+cd frontend
 npm install
 npm run dev
 ```
 
-## Ngrok (optional)
+Set required env vars from `.env.example` before running services.
 
-Expose backend for remote demo:
-```bash
-ngrok http --domain=<your-domain> 8000
+---
+
+## Demo & replay
+
+- demo/demo_stream.json contains example scenarios (politician, individual, benign).
+- demo/replay_demo.py posts items to the API and demonstrates agentic flows (verify → advisory → moderator queue).
+
+Example:
+```powershell
+python .\demo\replay_demo.py --file .\demo\demo_stream.json --host http://localhost:8000
 ```
-Update `VITE_API_BASE` in `.env` if needed.
 
-## Milestones
+---
 
-- Milestone 1: skeleton, basic ingest/list endpoints, minimal UI list, demo & replay
-- Milestone 2: detector + reverse-search stubs; aggregated evidence
-- Milestone 3: agent planner (Celery), advisory generator, moderator flows, tests
-- Milestone 4: polish, docs, ethics, final test suite
+## Tests
+
+Backend:
+```powershell
+cd backend
+pytest backend/tests -q
+```
+
+Frontend:
+```powershell
+cd frontend
+npm test
+```
+
+CI configuration and coverage targets are included in the repo.
+
+---
+
+## Configuration & environment variables
+
+Important files:
+- .env.example — copy to .env and fill values
+- config/thresholds.json — thresholds used by verifier & agent
+- backend/app/config.py — runtime configuration loader
+
+Typical env vars (defined in .env.example):
+- DATABASE_URL
+- REDIS_URL
+- CELERY_BROKER_URL
+- VITE_API_BASE (frontend)
+
+Adjust thresholds in config/thresholds.json to tune verdict sensitivity and routing.
+
+---
+
+## Contributing, ethics & license
+
+- See ETHICS.md for data policy, consent declarations, and human-in-loop rules.
+- Follow the moderation and retention policies before running on real data.
+- License: check LICENSE file in repository (or request license if missing).
+
+---
+
+## Troubleshooting
+
+- ffmpeg errors: ensure ffmpeg is installed and on PATH (Windows: add ffmpeg\bin to PATH).
+- Celery worker not processing tasks: confirm broker URL (Redis) and check `docker compose logs worker`.
+- Frontend cannot reach API: verify VITE_API_BASE matches backend host (CORS enabled in backend).
+
+---
+
+If any section needs expansion (example commands, architecture diagram, or API reference), indicate which areas to prioritize and a concise set of additions will be prepared.
